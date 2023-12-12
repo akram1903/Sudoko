@@ -13,10 +13,11 @@ from tkinter import *
 
 
 SCALE = 0.7
+
 window = Tk()
 canvas = Canvas(window,height=900*SCALE,width=900*SCALE,background="#50577A")
 # labels = [[None]*3]*3
-
+tiles = [[None]*9]*9
 # solutionPath = []
 # solutionIndex = 0
 
@@ -115,8 +116,6 @@ def drawEnvironment():
 
 
 def drawPuzzle():
-    label = [[None]*3]*3
-    print(label)
     for i in range(9):
         for j in range(9):
             canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{i} {j}')
