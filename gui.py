@@ -15,9 +15,12 @@ from tkinter import *
 SCALE = 0.7
 
 window = Tk()
+radioButtonsVar = IntVar(window, 1) 
 canvas = Canvas(window,height=900*SCALE,width=900*SCALE,background="#50577A")
-# labels = [[None]*3]*3
 tiles = [[None]*9]*9
+modeSelected=0
+selectedPlace=[-1,-1]
+
 # solutionPath = []
 # solutionIndex = 0
 
@@ -97,7 +100,38 @@ def terminate(event):
 #     else:
 #         hLabel.config(text="no h for this algorithm")
 #     levelLabel.config(text=f"{outputState.level}")
+def mode1():
+    global modeSelected,solveButton
+    modeSelected = 1
+    print(modeSelected)
+    solveButton = Button(window,text='Solve')
+    solveButton.place(x=1000,y=500)
+    
 
+def mode2():
+    global modeSelected,solveButton
+    modeSelected = 2
+    print(modeSelected)
+
+    solveButton = Button(window,text='Solve',font=('arial',17),foreground='#D6E4E5',background="#404258")
+    solveButton.place(x=1040*SCALE,y=425*SCALE)
+
+def mode3():
+    global modeSelected
+    modeSelected = 3
+    print(modeSelected)
+
+def drawRadioButtons():
+    global window,radioButtonsVar
+    
+
+    Radiobutton(window, text = "solve generated puzzle", variable = radioButtonsVar, 
+        value = 1, font=('arial',11),foreground='#D6E4E5',background="#404258",command=mode1).place(x=SCALE*950,y=SCALE*100,) 
+    Radiobutton(window, text = "solve given puzzle", variable = radioButtonsVar, 
+        value = 2, font=('arial',11),foreground='#D6E4E5',background="#404258",command=mode2).place(x=SCALE*950,y=SCALE*150)
+    Radiobutton(window, text = "Interactive", variable = radioButtonsVar, 
+        value = 3, font=('arial',11),foreground='#D6E4E5',background="#404258",command=mode3).place(x=SCALE*950,y=SCALE*200)
+    
 
 def drawEnvironment():
     window.geometry(f"{int(SCALE*1300)}x{int(SCALE*910)}")
@@ -120,41 +154,6 @@ def drawPuzzle():
         for j in range(9):
             canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{i} {j}')
     
-
-# def bfsSelector():
-#     global algorithm
-#     algorithm = 0
-#     print(algorithm)
-
-# def dfsSelector():
-#     global algorithm
-#     algorithm = 1
-#     print(algorithm)
-
-# def a_euclidian():
-#     global algorithm
-#     algorithm = 2
-#     print(algorithm)
-
-# def a_manhattan():
-#     global algorithm
-#     algorithm = 3
-#     print(algorithm)
-
-# def resetPuzzle(event = None):
-#     global entrySet,tileIndex,startState,solutionIndex,solutionPath,algorithm
-
-#     entrySet.clear()
-#     tileIndex = 0
-#     solutionIndex=0
-#     solutionPath.clear()
-#     algorithm = -1
-#     startState=puzzle.PuzzleState([
-#         [None,   None    ,None],
-#         [None,   None    ,None],
-#         [None,   None    ,None]])
-    
-#     ShowPuzzle(startState)
 
 # def buildTile(num):
     
@@ -179,38 +178,36 @@ def drawPuzzle():
 #         resetButton = Button(window,foreground='#D6E4E5',background="#50577A",text='reset',command=resetPuzzle,font=('arial',14))
 #         resetButton.place(x=SCALE*700,y=SCALE*(550))
         
-        
-# =================___edit here___================= 
-
 def keyPressed(event):
     print(event.keysym)
     num = event.keysym
-    arr = ["1","2","3","4","5","6","7","8","space","0"]
+    arr = ["1","2","3","4","5","6","7","8","space","BackSpace","0"]
 
     if num in arr:
         if event.keysym == "space" or event.keysym == "0":
             num = None
         print("available key")
-        buildTile(num)
 
-       
+def selectPlace(event):
+    global selectedPlace
+
+    colSelected = (event.x//(100*SCALE))
+    rowSelected = (event.y//(100*SCALE))
+    print('x=',event.x,'\ty=',event.y)
+    print('index of col',colSelected)
+    print('index of row',rowSelected,end='\n\n')
+    selectedPlace = [colSelected,rowSelected]
+
+
 if __name__ == "__main__":
-
     
     drawEnvironment()
-
     drawPuzzle()
+    drawRadioButtons()
     
+    canvas.place(x=0,y=0)
+    canvas.bind('<Button-1>',selectPlace)
 
-    
-    # window.bind("<Left>",goBack)
-    # window.bind("<Right>",goForward)
     window.bind("<Escape>",terminate)
     window.bind("<Key>",printKeys)
-    # window.bind("<BackSpace>",resetPuzzle)
-
-    # keys to input the puzzle to be solved
-    # window.bind("<Key>",keyPressed)
-    canvas.place(x=0,y=0)
-
     window.mainloop()
