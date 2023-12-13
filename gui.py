@@ -17,7 +17,8 @@ SCALE = 0.7
 window = Tk()
 radioButtonsVar = IntVar(window, 1) 
 canvas = Canvas(window,height=900*SCALE,width=900*SCALE,background="#50577A")
-tiles = [[None]*9]*9
+# tilesLabel = [[None]*9]*9
+current_state = None     # ????
 modeSelected=0
 selectedPlace=[-1,-1]
 
@@ -78,9 +79,19 @@ selectedPlace=[-1,-1]
 
 def printKeys(event):
     print(event.keysym+" key pressed")
+    if event.keysym in ["1","2","3","4","5","6","7","8","9","BackSpace","space"]:
+        testbind(event)
 
 def terminate(event):
     exit()
+
+# ============ not done ==============
+def generatePuzzle():
+    pass
+def solvePuzzle():
+    pass
+# ====================================
+
 
 # def ShowPuzzle(outputState):
 #     global hLabel
@@ -100,12 +111,13 @@ def terminate(event):
 #     else:
 #         hLabel.config(text="no h for this algorithm")
 #     levelLabel.config(text=f"{outputState.level}")
+
 def mode1():
     global modeSelected,solveButton
     modeSelected = 1
     print(modeSelected)
-    solveButton = Button(window,text='Solve')
-    solveButton.place(x=1000,y=500)
+    solveButton = Button(window,text='generate puzzle',font=('arial',17),foreground='#D6E4E5',background="#404258",command=generatePuzzle)
+    solveButton.place(x=950*SCALE,y=425*SCALE)
     
 
 def mode2():
@@ -113,7 +125,7 @@ def mode2():
     modeSelected = 2
     print(modeSelected)
 
-    solveButton = Button(window,text='Solve',font=('arial',17),foreground='#D6E4E5',background="#404258")
+    solveButton = Button(window,text='Solve',font=('arial',17),foreground='#D6E4E5',background="#404258",command=solvePuzzle)
     solveButton.place(x=1040*SCALE,y=425*SCALE)
 
 def mode3():
@@ -124,7 +136,6 @@ def mode3():
 def drawRadioButtons():
     global window,radioButtonsVar
     
-
     Radiobutton(window, text = "solve generated puzzle", variable = radioButtonsVar, 
         value = 1, font=('arial',11),foreground='#D6E4E5',background="#404258",command=mode1).place(x=SCALE*950,y=SCALE*100,) 
     Radiobutton(window, text = "solve given puzzle", variable = radioButtonsVar, 
@@ -134,6 +145,14 @@ def drawRadioButtons():
     
 
 def drawEnvironment():
+    global tilesLabel
+
+    for i in range(9):
+        for j in range(9):
+            # tilesLabel[i][j] = Label(window,text=f'{i}',font=('arial',40),foreground='#D6E4E5',background="#50577A")
+            # tilesLabel[i][j].place(x=(i*100+20)*SCALE,y=(j*100+3)*SCALE)
+            canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{i}',font=('arial',40),fill='#D6E4E5')
+
     window.geometry(f"{int(SCALE*1300)}x{int(SCALE*910)}")
     window.title("Suduko agent")
     window.config(background="#404258")
@@ -149,11 +168,13 @@ def drawEnvironment():
     canvas.create_line(0,600*SCALE,900*SCALE,600*SCALE,width=5*SCALE)
 
 
+
 def drawPuzzle():
+    global tilesLabel,current_state
     for i in range(9):
         for j in range(9):
-            canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{i} {j}')
-    
+            # canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{i} {j}')
+            pass
 
 # def buildTile(num):
     
@@ -191,13 +212,29 @@ def keyPressed(event):
 def selectPlace(event):
     global selectedPlace
 
+    if(event.x>900*SCALE or event.y>900*SCALE):
+        print('out of canvas')
+        return
+    
     colSelected = (event.x//(100*SCALE))
     rowSelected = (event.y//(100*SCALE))
     print('x=',event.x,'\ty=',event.y)
     print('index of col',colSelected)
     print('index of row',rowSelected,end='\n\n')
-    selectedPlace = [colSelected,rowSelected]
+    selectedPlace = [int(colSelected),int(rowSelected)]
 
+def testbind(event):
+    global selectedPlace,canvas,window
+    i = selectedPlace[0]
+    j = selectedPlace[1]
+
+    canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill='#50577A')
+    x = event.keysym
+    if x in ['BackSpace','space']:
+        x = ' '
+    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#D6E4E5')
+    window.update()
+    print('in testbind')
 
 if __name__ == "__main__":
     
@@ -206,8 +243,10 @@ if __name__ == "__main__":
     drawRadioButtons()
     
     canvas.place(x=0,y=0)
-    canvas.bind('<Button-1>',selectPlace)
 
-    window.bind("<Escape>",terminate)
+    window.bind('<Button-1>',selectPlace)
     window.bind("<Key>",printKeys)
+    # window.bind("1",testbind)
+    
+    window.bind("<Escape>",terminate)
     window.mainloop()
