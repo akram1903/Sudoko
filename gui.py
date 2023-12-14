@@ -136,14 +136,10 @@ def selectPlace(event):
     print('x=',event.x,'\ty=',event.y)
     print('index of col',colSelected)
     print('index of row',rowSelected,end='\n\n')
-
-    j,i=int(rowSelected),int(colSelected)
-    canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
-    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[j][i]}',font=('arial',40),fill='#D6E4E5')
     selectedPlace = [int(rowSelected),int(colSelected)]
-    print(current_state)
-    drawEnvironment()
 
+    drawSelectedTile()
+    
 # unselect only on gui selectedPlace haven't been touched
 def unselect():
     global selectedPlace
@@ -151,6 +147,20 @@ def unselect():
         j,i=selectedPlace[0],selectedPlace[1]
         canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=NORMAL_TILE_COLOR)
         canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[j][i]}',font=('arial',40),fill='#D6E4E5')
+
+
+def drawSelectedTile():
+
+    j,i=selectedPlace[0],selectedPlace[1]
+    canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
+    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[j][i]}',font=('arial',40),fill='#D6E4E5')
+    print(current_state)
+    drawEnvironment()
+    canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
+    canvas.create_line(0,100*j*SCALE,900*SCALE,100*j*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
+    canvas.create_line(100*(i+1)*SCALE,0,100*(1+i)*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
+    canvas.create_line(0,100*(j+1)*SCALE,900*SCALE,100*(1+j)*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
+    
 
 def changePlace(event):
     global selectedPlace
@@ -178,10 +188,16 @@ def changePlace(event):
             flag = True
             selectedPlace[0] += 1
     if flag:
-        j,i=selectedPlace[0],selectedPlace[1]
-        canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
-        canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[i][j]}',font=('arial',40),fill='#D6E4E5')
-    drawEnvironment()
+        # j,i=selectedPlace[0],selectedPlace[1]
+        # canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
+        # canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[i][j]}',font=('arial',40),fill='#D6E4E5')
+        # drawEnvironment()
+
+        # canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
+        # canvas.create_line(0,100*j*SCALE,900*SCALE,100*j*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
+        # canvas.create_line(100*(i+1)*SCALE,0,100*(1+i)*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
+        # canvas.create_line(0,100*(j+1)*SCALE,900*SCALE,100*(1+j)*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
+        drawSelectedTile()
 
 def editSelectedTile(event):
     global selectedPlace,canvas,window,current_state
@@ -194,7 +210,7 @@ def editSelectedTile(event):
         x = ' '
     canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
     window.update()
-    if x not in ['BackSpace','space']:
+    if x != ' ':
         x = int(x)
     current_state[j][i]=x
     # print('in testbind')
