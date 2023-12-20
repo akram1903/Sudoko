@@ -1,3 +1,4 @@
+from arc import Arc
 class Variable:
     def __init__(self,domain=None) -> None:
         if domain is None:
