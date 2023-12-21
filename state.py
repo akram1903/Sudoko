@@ -9,15 +9,21 @@ class State:
                 for k in range(9):
                     # self.constraints.append((self.variables[i][j], self.variables[i][k]))
                     # self.constraints.append((self.variables[k][i], self.variables[k][i]))
-                    if i==3*(i//3)+(k//3) and j==3*(j//3)+k%3 :
-                        continue
-                    blockArc1 = (self.variables[i][j], self.variables[3*(i//3)+(k//3)][3*(j//3)+k%3])
-                    self.constraints.append(blockArc1)
+                    if not ( i==3*(i//3)+(k//3) and j==3*(j//3)+k%3) :
+                        blockArc1 = (self.variables[i][j], self.variables[3*(i//3)+(k//3)][3*(j//3)+k%3])
+                        self.constraints.append(blockArc1)
+
+                    if j!= k:  
+                        rowArc = (self.variables[i][j],self.variables[i][k])
+                        self.constraints.append(rowArc)
                     
-                # # for k in range():
-                #     self.constraints.append((self.variables[i][j],self.variables[i+1][j]))
-                #     self.constraints.append((self.variables[i][j],self.variables[i][j+1]))
-                #     self.constraints.append((self.variables[i][j],))
+                    if i!=k:
+                        colArc = (self.variables[i][j],self.variables[k][j])
+                        self.constraints.append(colArc)
+
+
+                        print(f'{colArc[0]}\t{colArc[1]}')
+                    
         
 
     def __init__(self,grid) -> None:
@@ -43,7 +49,12 @@ class State:
         queue = [(arc.Xi, arc.Xj) for Xi in self.variables for Xj in Xi.neighbors()]
 
 
-        
+    def get_constraints_for_variable(variable, constraints):
+        variable_constraints = []
+        for arc in constraints:
+            if variable == arc[1]:
+                variable_constraints.append(arc[0])
+        return variable_constraints
         
 
 # by rana , but edited by akram , saif shahed 3al kalam dah
