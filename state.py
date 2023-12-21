@@ -5,7 +5,7 @@ class State:
 
     def createArcs(self):
         for i in range(9):
-            for j in range(9):
+            for j in range(9): 
                 for k in range(j + 1, 9):
                     # self.constraints.append((self.variables[i][j], self.variables[i][k]))
                     # self.constraints.append((self.variables[k][i], self.variables[k][i]))
