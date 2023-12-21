@@ -6,20 +6,20 @@ class State:
     def createArcs(self):
         for i in range(9):
             for j in range(9): 
-                for k in range(j + 1, 9):
+                for k in range(9):
                     # self.constraints.append((self.variables[i][j], self.variables[i][k]))
                     # self.constraints.append((self.variables[k][i], self.variables[k][i]))
+                    if i==3*(i//3)+(k//3) and j==3*(j//3)+k%3 :
+                        continue
                     blockArc1 = (self.variables[i][j], self.variables[3*(i//3)+(k//3)][3*(j//3)+k%3])
-                    blockArc2 = (self.variables[3*(i//3)+(k//3)][3*(j//3)+k%3],self.variables[i][j])
-                    print(f'{self.variables[i][j]}\t{self.variables[3*(i//3)+(k//3)][(3*(j//3))+(k%3)]}')
                     self.constraints.append(blockArc1)
-                    self.constraints.append(blockArc2)
                     
                 # # for k in range():
                 #     self.constraints.append((self.variables[i][j],self.variables[i+1][j]))
                 #     self.constraints.append((self.variables[i][j],self.variables[i][j+1]))
                 #     self.constraints.append((self.variables[i][j],))
         
+
     def __init__(self,grid) -> None:
         self.grid = grid
         self.variables = []
