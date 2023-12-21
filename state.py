@@ -2,10 +2,28 @@ from variable import *
 from arc import *
 class State:
     grid:list(list())
+
+    def createArcs(self):
+        for i in range(9):
+            for j in range(9):
+                for k in range(j + 1, 9):
+                    # self.constraints.append((self.variables[i][j], self.variables[i][k]))
+                    # self.constraints.append((self.variables[k][i], self.variables[k][i]))
+                    blockArc1 = (self.variables[i][j], self.variables[3*(i//3)+(k//3)][3*(j//3)+k%3])
+                    blockArc2 = (self.variables[3*(i//3)+(k//3)][3*(j//3)+k%3],self.variables[i][j])
+                    print(f'{self.variables[i][j]}\t{self.variables[3*(i//3)+(k//3)][(3*(j//3))+(k%3)]}')
+                    self.constraints.append(blockArc1)
+                    self.constraints.append(blockArc2)
+                    
+                # # for k in range():
+                #     self.constraints.append((self.variables[i][j],self.variables[i+1][j]))
+                #     self.constraints.append((self.variables[i][j],self.variables[i][j+1]))
+                #     self.constraints.append((self.variables[i][j],))
+        
     def __init__(self,grid) -> None:
         self.grid = grid
         self.variables = []
-
+        self.constraints = []
         for i in range(9):
             tmp =[]
             for j in range(9):
@@ -14,6 +32,8 @@ class State:
                 else:
                     tmp.append(Variable(domain=[grid[i][j]],value=grid[i][j]))
             self.variables.append(tmp)
+        self.createArcs()
+
 
     def __str__(self) -> str:
         return f'{grid}\n\n{self.variables}\n'
@@ -21,6 +41,7 @@ class State:
 
     def ac3(self,arc:Arc)->bool:
         queue = [(arc.Xi, arc.Xj) for Xi in self.variables for Xj in Xi.neighbors()]
+
 
         
         
@@ -43,20 +64,27 @@ def print_values(s:State):
 
 if __name__ == '__main__':
 
-    grid=[[0,7,0,0,0,0,6,8,0],
-      [0,0,0,0,7,3,0,0,9],
-      [3,0,9,0,0,0,0,4,5],
-      [4,9,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,9,0,2],
-      [0,0,0,0,0,0,0,3,6],
-      [9,6,0,0,0,0,3,0,8],
-      [7,0,0,6,8,0,0,0,0],
-      [0,2,8,0,0,0,6,8,0],]
+    # grid=[[0,7,0,0,0,0,6,8,0],
+    #   [0,0,0,0,7,3,0,0,9],
+    #   [3,0,9,0,0,0,0,4,5],
+    #   [4,9,0,0,0,0,0,0,0],
+    #   [0,0,0,0,0,0,9,0,2],
+    #   [0,0,0,0,0,0,0,3,6],
+    #   [9,6,0,0,0,0,3,0,8],
+    #   [7,0,0,6,8,0,0,0,0],
+    #   [0,2,8,0,0,0,6,8,0],]
     
+    grid = []
+    for i in range(9):
+        tmp = []
+        for j in range(9):
+            tmp.append((j+1)*(i+100))
+        grid.append(tmp)
     s = State(grid)
 
+    print(end='\n\n\n\t\t==========================\n\n\n')
+    
     print_values(s)
-        
     # print('ay 7aga')
     # print('ay 7aga 2')
     # print(s)
