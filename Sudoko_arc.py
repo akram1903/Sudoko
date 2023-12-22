@@ -3,45 +3,50 @@
 import queue
 from state import *
 
+
 #THE MAIN AC-3 ALGORITHM
-def AC3(csp):
-	q = queue.Queue()
+def AC3(my_state,num):
+    q = queue.Queue()
+# get pairs of cconstrains for each variable 
+    
+    for arc in my_state.get_variable_arcs(num):
+        q.put(arc)
 
-	for arc in csp.constraints:
-		q.put(arc)
+    i = 0
+    while not q.empty():
+        (Xi, Xj) = q.get()
 
-	i = 0
-	while not q.empty():
-		(Xi, Xj) = q.get()
+        i = i + 1 
 
-		i = i + 1 
+        if Revise(my_state, Xi, Xj):
+            if len(my_state.Xi.domain) == 0:
+                return False
 
-		if Revise(csp, Xi, Xj):
-			if len(csp.Xi.domain) == 0:
-				return False
+            # for Xk in (csp.get_constraints_for_variable(Xi) - Xj):
+            #    remove elmfrood logicalyy mlha4 lazma
+            for Xk in (my_state.get_constraints_for_variable(Xi).remove(Xj)):
+                q.put((Xk, Xi))
+                    # /////////////////
 
-			for Xk in (csp.peers[Xi] - Xj):
-				q.put((Xk, Xi))
-
-	#display(csp.values)
-	return True 
+    #display(csp.values)
+    return True 
 
 #WORKING OF THE REVISE ALGORITHM
-def Revise(csp, Xi, Xj):
+def Revise(my_state, Xi, Xj):
 	revised = False
-	values = set(csp.Xi.domain)
+	values = set(my_state.Xi.domain)
 	
 	for x in values:
             
-		if  isconsistent(csp, x, Xi, Xj):
-			csp.Xi.domain.remove(x)
+		if  isconsistent(my_state, x, Xi, Xj):
+			my_state.Xi.domain.remove(x)
 			revised = True 
 
 	return revised 
 
 #CHECKS IF THE GIVEN ASSIGNMENT IS CONSISTENT
-def isconsistent(csp, x, Xi, Xj):
-	for y in csp.Xj.domain:
+def isconsistent(my_state, x, Xi, Xj):
+	for y in my_state.Xj.domain:
 		if y!=x:
 			return False
 
@@ -60,6 +65,8 @@ grid=[[0,7,0,0,0,0,6,8,0],
       [9,6,0,0,0,0,3,0,8],
       [7,0,0,6,8,0,0,0,0],
       [0,2,8,0,0,0,6,8,0],]
+state1 = State(grid)
+state1.createArcs
 #sudoko has one correct result 
 #move in a decision chain if false return and find another chain
 
@@ -86,7 +93,7 @@ def is_valid_move(grid,row,col,num):
     #   valid move no false now
     return True
 
-def Backtracking_Solver(grid,row,col): #Recursive Function
+def Backtracking_Solver(state1,row,col): #Recursive Function
     #   Base Case Reaching final point
     if col == 9 : # last col we have is 8     so this is overboard
         if row==8: #    check reaching last row so sudoko is solved 
@@ -95,17 +102,19 @@ def Backtracking_Solver(grid,row,col): #Recursive Function
             row =   row + 1
             col = 0
             
-    if grid[row][col]>0:  #if current cell is already solved go to next col
-        return  Backtracking_Solver(grid,row,col+1)  #recursive call next col
+    if state1.grid[row][col]>0:  #if current cell is already solved go to next col
+        return  Backtracking_Solver(state1,row,col+1)  #recursive call next col
     for num in range (1,10): #  numbers 1->9
-        if is_valid_move(grid,row,col,num):#    check if valid before adding it to board 
-            grid[row][col] = num #  we will assume this is the correct soln 
-            #Based on trial and error
-            if(AC3(grid)):
-                if (Backtracking_Solver(grid,row,col+1)): 
+        if is_valid_move(state1.grid,row,col,num):#    check if valid before adding it to board 
+            num = Variable(value=num)
+            state1.grid[row][col] = num #  we will assume this is the correct soln 
+            # if(AC3(state1,num)):
+                #Based on trial and error
+            if (Backtracking_Solver(state1,row,col+1)): 
+                if(AC3(state1,num)):
                     return True
-            
-        grid[row][col]=0    #if not valid move 
+        zer0 = Variable(value=0)
+        state1.grid[row][col]=zer0   #if not valid move 
         
     return False
 
@@ -128,14 +137,14 @@ def print_board(grid):
         
 
 print("Sudoku Board Before Solving")
-print_board(grid)  
+print_board(state1.grid)  
 print("________________________________")
 print("")
 
 #   print board after solution       
-if Backtracking_Solver (grid,0,0):
+if Backtracking_Solver (state1,0,0):
     print("Soduko board Solved !!")
-    print_board(grid)  
+    print_board(state1.grid)  
 #     for i in range (9):
 #         for j in range (9):
 #             print(grid[i][j], end=" ")

@@ -49,13 +49,22 @@ class State:
         queue = [(arc.Xi, arc.Xj) for Xi in self.variables for Xj in Xi.neighbors()]
 
 
-    def get_constraints_for_variable(variable, constraints):
+    def get_constraints_for_variable(self,variable):
         variable_constraints = []
-        for arc in constraints:
-            if variable == arc[1]:
+        for arc in self.constraints:
+
+            if variable.value == arc[1].value:
                 variable_constraints.append(arc[0])
         return variable_constraints
-        
+    
+    def get_variable_arcs(self,variable):
+        variable_constraints = []
+        for arc in self.constraints:
+#  i want to append arcs from both sides
+            if variable.value == arc[0].value or variable.value == arc[1].value:
+                variable_constraints.append(arc)
+        return variable_constraints
+    
 
 # by rana , but edited by akram , saif shahed 3al kalam dah
 def print_values(s:State):
