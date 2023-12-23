@@ -1,14 +1,6 @@
-# import arcade
 
-# arcade.open_window(1080, 720,"8-puzzle AI")
-# arcade.set_background_color(arcade.color.DAVY_GREY)
-
-# arcade.start_render()
-
-# arcade.finish_render()
-
-# arcade.run()
 from tkinter import *
+import Sudoku_Backtracking
 
 NORMAL_TILE_COLOR = '#50577A'
 SELECTED_TILE_COLOR = '#AAAAAA'
@@ -25,7 +17,7 @@ radioButtonsVar = IntVar(window, 1)
 canvas = Canvas(window,height=900*SCALE,width=900*SCALE,background="#50577A")
 button = None
 
-current_state:list =  []
+current_state:list[list[int]] =  []
 for i in range(9):
     current_state.append([])
     for j in range(9):
@@ -120,8 +112,8 @@ def keyPressed(event):
     arr = ["1","2","3","4","5","6","7","8","space","BackSpace","0"]
 
     if num in arr:
-        if event.keysym == "space" or event.keysym == "0":
-            num = None
+        # if event.keysym == "space" or event.keysym == "0":
+        #     num = None
         print("available key")
 
 def selectPlace(event):
@@ -188,15 +180,6 @@ def changePlace(event):
             flag = True
             selectedPlace[0] += 1
     if flag:
-        # j,i=selectedPlace[0],selectedPlace[1]
-        # canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
-        # canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[i][j]}',font=('arial',40),fill='#D6E4E5')
-        # drawEnvironment()
-
-        # canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
-        # canvas.create_line(0,100*j*SCALE,900*SCALE,100*j*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
-        # canvas.create_line(100*(i+1)*SCALE,0,100*(1+i)*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
-        # canvas.create_line(0,100*(j+1)*SCALE,900*SCALE,100*(1+j)*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
         drawSelectedTile()
 
 def editSelectedTile(event):
@@ -213,7 +196,8 @@ def editSelectedTile(event):
     if x != ' ':
         x = int(x)
     current_state[j][i]=x
-    # print('in testbind')
+
+    Sudoku_Backtracking.print_board(current_state)
 
     drawEnvironment()
 

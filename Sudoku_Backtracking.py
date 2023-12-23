@@ -77,19 +77,19 @@ def print_board(grid):
         
      
         
-
-print("Sudoku Board Before Solving")
-print_board(grid)  
-print("________________________________")
-print("")
-
-#   print board after solution       
-if Backtracking_Solver (grid,0,0):
-    print("Soduko board Solved !!")
+if __name__ == '__main__':
+    print("Sudoku Board Before Solving")
     print_board(grid)  
-#     for i in range (9):
-#         for j in range (9):
-#             print(grid[i][j], end=" ")
-#         print()
-else:
-    print("No Solution For This Sudoku")
+    print("________________________________")
+    print("")
+
+    #   print board after solution       
+    if Backtracking_Solver (grid,0,0):
+        print("Soduko board Solved !!")
+        print_board(grid)  
+    #     for i in range (9):
+    #         for j in range (9):
+    #             print(grid[i][j], end=" ")
+    #         print()
+    else:
+        print("No Solution For This Sudoku")
