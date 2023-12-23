@@ -21,7 +21,7 @@ current_state:list[list[int]] =  []
 for i in range(9):
     current_state.append([])
     for j in range(9):
-        current_state[i].append(' ')
+        current_state[i].append(0)
 
 modeSelected=0
 selectedPlace=[-1,-1]
@@ -37,8 +37,17 @@ def terminate(event):
 # ============ not done ==============
 def generatePuzzle():
     pass
+
 def solvePuzzle():
-    pass
+    global current_state
+    print(current_state)
+    if Sudoku_Backtracking.Backtracking_Solver(current_state,0,0):
+        print("Soduko board Solved !!")
+        Sudoku_Backtracking.print_board(current_state)  
+        drawPuzzle()
+        # window.update()
+    else:
+        print("No Solution For This Sudoku")
 # ====================================
 
 def mode1():
@@ -103,7 +112,10 @@ def drawPuzzle():
     
     for i in range(9):
         for j in range(9):
-            canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[i][j]}',font=('arial',40),fill='#D6E4E5')
+            element = current_state[i][j]
+            if element == 0:
+                element = ' '
+            canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
 
 
 def keyPressed(event):
@@ -137,16 +149,22 @@ def unselect():
     global selectedPlace
     if(selectedPlace[0]>-1):
         j,i=selectedPlace[0],selectedPlace[1]
+        element = current_state[j][i]
+        if element == 0:
+            element = ' '
         canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=NORMAL_TILE_COLOR)
-        canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[j][i]}',font=('arial',40),fill='#D6E4E5')
+        canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
 
 
 def drawSelectedTile():
 
     j,i=selectedPlace[0],selectedPlace[1]
     canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
-    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[j][i]}',font=('arial',40),fill='#D6E4E5')
-    print(current_state)
+    element= current_state[j][i]
+    if element == 0:
+        element = ' '
+    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
+    # print(current_state)
     drawEnvironment()
     canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
     canvas.create_line(0,100*j*SCALE,900*SCALE,100*j*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
@@ -189,13 +207,15 @@ def editSelectedTile(event):
 
     canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
     x = event.keysym
-    if x in ['BackSpace','space']:
-        x = ' '
+    if x in ['BackSpace','space','0']:
+        x = 0
+    current_state[j][i]=int(x)
+    if x ==0:
+        x=' '
     canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
     window.update()
-    if x != ' ':
-        x = int(x)
-    current_state[j][i]=x
+    
+    
 
     Sudoku_Backtracking.print_board(current_state)
 
