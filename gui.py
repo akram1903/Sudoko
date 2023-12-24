@@ -1,38 +1,32 @@
-# import arcade
 
-# arcade.open_window(1080, 720,"8-puzzle AI")
-# arcade.set_background_color(arcade.color.DAVY_GREY)
-
-# arcade.start_render()
-
-# arcade.finish_render()
-
-# arcade.run()
 from tkinter import *
-
+import copy
+import time
+import Sudoku_Backtracking
+import backtrackingForGui
 NORMAL_TILE_COLOR = '#50577A'
 SELECTED_TILE_COLOR = '#AAAAAA'
 
 SCALE = 0.7
+if __name__=='__main__':
+    window = Tk()
+    window.geometry(f"{int(SCALE*1300)}x{int(SCALE*910)}")
+    window.title("Suduko agent")
+    window.config(background="#404258")
+    window.resizable(False,False)
 
-window = Tk()
-window.geometry(f"{int(SCALE*1300)}x{int(SCALE*910)}")
-window.title("Suduko agent")
-window.config(background="#404258")
-window.resizable(False,False)
+    radioButtonsVar = IntVar(window, 1) 
+    canvas = Canvas(window,height=900*SCALE,width=900*SCALE,background="#50577A")
+    button = None
 
-radioButtonsVar = IntVar(window, 1) 
-canvas = Canvas(window,height=900*SCALE,width=900*SCALE,background="#50577A")
-button = None
+    current_state:list[list[int]] =  []
+    for i in range(9):
+        current_state.append([])
+        for j in range(9):
+            current_state[i].append(0)
 
-current_state:list =  []
-for i in range(9):
-    current_state.append([])
-    for j in range(9):
-        current_state[i].append(' ')
-
-modeSelected=0
-selectedPlace=[-1,-1]
+    modeSelected=0
+    selectedPlace=[-1,-1]
 
 def printKeys(event):
     print(event.keysym+" key pressed")
@@ -45,8 +39,46 @@ def terminate(event):
 # ============ not done ==============
 def generatePuzzle():
     pass
+
 def solvePuzzle():
-    pass
+    global current_state
+    # print(current_state)
+    copyOfState = copy.deepcopy(current_state)
+    if Sudoku_Backtracking.Backtracking_Solver(copyOfState,0,0):
+        print("Soduko board Solved !!")
+        Sudoku_Backtracking.print_board(current_state)  
+        # drawPuzzle()
+        # window.update()
+        Backtracking_Solver(current_state,0,0)
+    else:
+        print("No Solution For This Sudoku")
+
+def Backtracking_Solver(grid,row,col): 
+    
+    if col == 9 :
+        if row==8: 
+            return True
+        else:
+            row =   row + 1
+            col = 0
+            
+    if grid[row][col]>0: 
+        return  Backtracking_Solver(grid,row,col+1)
+    for num in range (1,10): 
+        if backtrackingForGui.is_valid_move(grid,row,col,num):
+            grid[row][col] = num 
+            editTileOn(row,col,num)
+            time.sleep(0.25)
+            if (Backtracking_Solver(grid,row,col+1)): 
+                return True
+            
+        grid[row][col]=0
+        editTileOn(row,col,num)
+
+        
+    return False
+
+            
 # ====================================
 
 def mode1():
@@ -111,7 +143,10 @@ def drawPuzzle():
     
     for i in range(9):
         for j in range(9):
-            canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[i][j]}',font=('arial',40),fill='#D6E4E5')
+            element = current_state[i][j]
+            if element == 0:
+                element = ' '
+            canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
 
 
 def keyPressed(event):
@@ -120,8 +155,8 @@ def keyPressed(event):
     arr = ["1","2","3","4","5","6","7","8","space","BackSpace","0"]
 
     if num in arr:
-        if event.keysym == "space" or event.keysym == "0":
-            num = None
+        # if event.keysym == "space" or event.keysym == "0":
+        #     num = None
         print("available key")
 
 def selectPlace(event):
@@ -145,16 +180,22 @@ def unselect():
     global selectedPlace
     if(selectedPlace[0]>-1):
         j,i=selectedPlace[0],selectedPlace[1]
+        element = current_state[j][i]
+        if element == 0:
+            element = ' '
         canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=NORMAL_TILE_COLOR)
-        canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[j][i]}',font=('arial',40),fill='#D6E4E5')
+        canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
 
 
 def drawSelectedTile():
 
     j,i=selectedPlace[0],selectedPlace[1]
     canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
-    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[j][i]}',font=('arial',40),fill='#D6E4E5')
-    print(current_state)
+    element= current_state[j][i]
+    if element == 0:
+        element = ' '
+    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
+    # print(current_state)
     drawEnvironment()
     canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
     canvas.create_line(0,100*j*SCALE,900*SCALE,100*j*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
@@ -188,15 +229,6 @@ def changePlace(event):
             flag = True
             selectedPlace[0] += 1
     if flag:
-        # j,i=selectedPlace[0],selectedPlace[1]
-        # canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
-        # canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{current_state[i][j]}',font=('arial',40),fill='#D6E4E5')
-        # drawEnvironment()
-
-        # canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
-        # canvas.create_line(0,100*j*SCALE,900*SCALE,100*j*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
-        # canvas.create_line(100*(i+1)*SCALE,0,100*(1+i)*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
-        # canvas.create_line(0,100*(j+1)*SCALE,900*SCALE,100*(1+j)*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
         drawSelectedTile()
 
 def editSelectedTile(event):
@@ -206,19 +238,50 @@ def editSelectedTile(event):
 
     canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
     x = event.keysym
-    if x in ['BackSpace','space']:
-        x = ' '
+    if x in ['BackSpace','space','0']:
+        x = 0
+    current_state[j][i]=int(x)
+    if x ==0:
+        x=' '
     canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
     window.update()
-    if x != ' ':
-        x = int(x)
-    current_state[j][i]=x
-    # print('in testbind')
+    
+    
+
+    Sudoku_Backtracking.print_board(current_state)
 
     drawEnvironment()
 
+
+def editTileOn(row,col,newValue):
+    global selectedPlace
+    selectedPlace = [row,col]
+    drawSelectedTile()
+
+    canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
+    x = newValue
+    if x in ['BackSpace','space','0']:
+        x = 0
+    current_state[j][i]=int(x)
+    if x ==0:
+        x=' '
+    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
+    window.update()
+    drawEnvironment()
+
+
 if __name__ == "__main__":
     
+    current_state = [[0,7,0,0,0,0,6,8,0],
+                    [0,0,0,0,7,3,0,0,9],
+                    [3,0,9,0,0,0,0,4,5],
+                    [4,9,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,9,0,2],
+                    [0,0,0,0,0,0,0,3,6],
+                    [9,6,0,0,0,0,3,0,8],
+                    [7,0,0,6,8,0,0,0,0],
+                    [0,2,8,0,0,0,6,8,0],]
+
     drawEnvironment()
     drawRadioButtons()
     
