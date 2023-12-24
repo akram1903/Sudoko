@@ -1,30 +1,32 @@
 
 from tkinter import *
+import copy
+import time
 import Sudoku_Backtracking
-
+import backtrackingForGui
 NORMAL_TILE_COLOR = '#50577A'
 SELECTED_TILE_COLOR = '#AAAAAA'
 
 SCALE = 0.7
+if __name__=='__main__':
+    window = Tk()
+    window.geometry(f"{int(SCALE*1300)}x{int(SCALE*910)}")
+    window.title("Suduko agent")
+    window.config(background="#404258")
+    window.resizable(False,False)
 
-window = Tk()
-window.geometry(f"{int(SCALE*1300)}x{int(SCALE*910)}")
-window.title("Suduko agent")
-window.config(background="#404258")
-window.resizable(False,False)
+    radioButtonsVar = IntVar(window, 1) 
+    canvas = Canvas(window,height=900*SCALE,width=900*SCALE,background="#50577A")
+    button = None
 
-radioButtonsVar = IntVar(window, 1) 
-canvas = Canvas(window,height=900*SCALE,width=900*SCALE,background="#50577A")
-button = None
+    current_state:list[list[int]] =  []
+    for i in range(9):
+        current_state.append([])
+        for j in range(9):
+            current_state[i].append(0)
 
-current_state:list[list[int]] =  []
-for i in range(9):
-    current_state.append([])
-    for j in range(9):
-        current_state[i].append(0)
-
-modeSelected=0
-selectedPlace=[-1,-1]
+    modeSelected=0
+    selectedPlace=[-1,-1]
 
 def printKeys(event):
     print(event.keysym+" key pressed")
@@ -40,14 +42,43 @@ def generatePuzzle():
 
 def solvePuzzle():
     global current_state
-    print(current_state)
-    if Sudoku_Backtracking.Backtracking_Solver(current_state,0,0):
+    # print(current_state)
+    copyOfState = copy.deepcopy(current_state)
+    if Sudoku_Backtracking.Backtracking_Solver(copyOfState,0,0):
         print("Soduko board Solved !!")
         Sudoku_Backtracking.print_board(current_state)  
-        drawPuzzle()
+        # drawPuzzle()
         # window.update()
+        Backtracking_Solver(current_state,0,0)
     else:
         print("No Solution For This Sudoku")
+
+def Backtracking_Solver(grid,row,col): 
+    
+    if col == 9 :
+        if row==8: 
+            return True
+        else:
+            row =   row + 1
+            col = 0
+            
+    if grid[row][col]>0: 
+        return  Backtracking_Solver(grid,row,col+1)
+    for num in range (1,10): 
+        if backtrackingForGui.is_valid_move(grid,row,col,num):
+            grid[row][col] = num 
+            editTileOn(row,col,num)
+            time.sleep(0.25)
+            if (Backtracking_Solver(grid,row,col+1)): 
+                return True
+            
+        grid[row][col]=0
+        editTileOn(row,col,num)
+
+        
+    return False
+
+            
 # ====================================
 
 def mode1():
@@ -221,8 +252,36 @@ def editSelectedTile(event):
 
     drawEnvironment()
 
+
+def editTileOn(row,col,newValue):
+    global selectedPlace
+    selectedPlace = [row,col]
+    drawSelectedTile()
+
+    canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
+    x = newValue
+    if x in ['BackSpace','space','0']:
+        x = 0
+    current_state[j][i]=int(x)
+    if x ==0:
+        x=' '
+    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
+    window.update()
+    drawEnvironment()
+
+
 if __name__ == "__main__":
     
+    current_state = [[0,7,0,0,0,0,6,8,0],
+                    [0,0,0,0,7,3,0,0,9],
+                    [3,0,9,0,0,0,0,4,5],
+                    [4,9,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,9,0,2],
+                    [0,0,0,0,0,0,0,3,6],
+                    [9,6,0,0,0,0,3,0,8],
+                    [7,0,0,6,8,0,0,0,0],
+                    [0,2,8,0,0,0,6,8,0],]
+
     drawEnvironment()
     drawRadioButtons()
     
