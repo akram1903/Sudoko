@@ -3,19 +3,25 @@ import pygame
 import time
 pygame.font.init()
 # from Sudoku_Backtracking import Backtracking_Solver,is_valid_move
+BACKGROUND_COLOR = (240, 240, 240)
+GRID_COLOR = (184, 134, 11)
+SELECTED_COLOR = (0, 128, 255)
+ERROR_COLOR = (255, 0, 0)
+TEXT_COLOR = (0, 0, 0)
+game_over_image = pygame.image.load("game_over_image.png")  # Replace with the actual file path
 
 
 class Grid:
     board = [
-        [7, 8, 0, 4, 0, 0, 1, 2, 0],
-        [6, 0, 0, 0, 7, 5, 0, 0, 9],
-        [0, 0, 0, 6, 0, 1, 0, 7, 8],
-        [0, 0, 7, 0, 4, 0, 2, 6, 0],
-        [0, 0, 1, 0, 5, 0, 9, 3, 0],
-        [9, 0, 4, 0, 6, 0, 0, 0, 5],
-        [0, 7, 0, 3, 0, 0, 0, 1, 2],
-        [1, 2, 0, 0, 0, 7, 4, 0, 0],
-        [0, 4, 9, 2, 0, 6, 0, 0, 7]
+        [0, 0, 0, 2, 6, 0, 7, 0, 1],
+        [6, 8, 0, 0, 7, 0, 0, 9, 0],
+        [1, 9, 0, 0, 0, 4, 5, 0, 0],
+        [8, 2, 0, 1, 0, 0, 0, 4, 0],
+        [0, 0, 4, 6, 0, 2, 9, 0, 0],
+        [0, 5, 0, 0, 0, 3, 0, 2, 8],
+        [0, 0, 9, 3, 0, 0, 0, 7, 4],
+        [0, 4, 0, 0, 5, 0, 0, 3, 6],
+        [7, 0, 3, 0, 1, 8, 0, 0, 0]
     ]
 
     def __init__(self, rows, cols, width, height, win):
@@ -58,8 +64,8 @@ class Grid:
                 thick = 4
             else:
                 thick = 1
-            pygame.draw.line(self.win, (0,0,0), (0, i*gap), (self.width, i*gap), thick)
-            pygame.draw.line(self.win, (0, 0, 0), (i * gap, 0), (i * gap, self.height), thick)
+            pygame.draw.line(self.win, GRID_COLOR, (0, i * gap), (self.width, i * gap), thick)
+            pygame.draw.line(self.win, GRID_COLOR, (i * gap, 0), (i * gap, self.height), thick)
 
         # Draw Cubes
         for i in range(self.rows):
@@ -162,8 +168,9 @@ class Cube:
         self.selected = False
 
     def draw(self, win):
+        
         fnt = pygame.font.SysFont("comicsans", 40)
-
+        
         gap = self.width / 9
         x = self.col * gap
         y = self.row * gap
@@ -176,7 +183,7 @@ class Cube:
             win.blit(text, (x + (gap/2 - text.get_width()/2), y + (gap/2 - text.get_height()/2)))
 
         if self.selected:
-            pygame.draw.rect(win, (255,0,0), (x,y, gap ,gap), 3)
+             pygame.draw.rect(win, SELECTED_COLOR, (x, y, gap, gap), 3)
 
     def draw_change(self, win, g=True):
         fnt = pygame.font.SysFont("comicsans", 40)
@@ -190,10 +197,9 @@ class Cube:
         text = fnt.render(str(self.value), 1, (0, 0, 0))
         win.blit(text, (x + (gap / 2 - text.get_width() / 2), y + (gap / 2 - text.get_height() / 2)))
         if g:
-            pygame.draw.rect(win, (0, 255, 0), (x, y, gap, gap), 3)
+            pygame.draw.rect(win, GRID_COLOR, (x, y, gap, gap), 3)  # Grid color
         else:
-            pygame.draw.rect(win, (255, 0, 0), (x, y, gap, gap), 3)
-
+               pygame.draw.rect(win, ERROR_COLOR, (x, y, gap, gap), 3)  # Error color
     def set(self, val):
         self.value = val
 
@@ -234,14 +240,17 @@ def valid(bo, num, pos):
 
 
 def redraw_window(win, board, time, strikes):
-    win.fill((255,255,255))
+    if board.is_finished():
+        # Draw "Game Over" image
+        win.blit(game_over_image, (0, 0))
+    win.fill(BACKGROUND_COLOR)
     # Draw time
-    fnt = pygame.font.SysFont("comicsans", 40)
+    fnt = pygame.font.SysFont("TimesNewRoman", 30)
     text = fnt.render("Time: " + format_time(time), 1, (0,0,0))
-    win.blit(text, (540 - 160, 560))
+    win.blit(text, (20,560))
     # Draw Strikes
-    text = fnt.render("X " * strikes, 1, (255, 0, 0))
-    win.blit(text, (20, 560))
+    text = fnt.render("F"* strikes, 1, (255, 0, 0))
+    win.blit(text, (540 - 250, 550))
     # Draw grid and board
     board.draw()
 
