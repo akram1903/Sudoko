@@ -44,8 +44,8 @@ def generatePuzzle():
 
     grid = copy.deepcopy(solvedGrid)
 
-    n_of_empty_tiles=random.randint(40,50)
-
+    n_of_empty_tiles=random.randint(30,30)
+    # n_of_empty_tiles=30
     while(n_of_empty_tiles>0):
         i=random.randint(0,8)
         j=random.randint(0,8)

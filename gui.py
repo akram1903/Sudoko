@@ -4,6 +4,7 @@ import copy
 import time
 import Sudoku_Backtracking
 import backtrackingForGui
+import generatePuzzle
 NORMAL_TILE_COLOR = '#50577A'
 SELECTED_TILE_COLOR = '#AAAAAA'
 
@@ -51,8 +52,11 @@ def terminate(event):
     exit()
 
 # ============ not done ==============
-def generatePuzzle():
-    pass
+def genPuzzle():
+    global current_state
+    certificate,current_state=generatePuzzle.generatePuzzle()
+    drawPuzzle()
+    unselect()
 
 def solvePuzzle():
     global current_state
@@ -60,12 +64,23 @@ def solvePuzzle():
     copyOfState = copy.deepcopy(current_state)
     if Sudoku_Backtracking.Backtracking_Solver(copyOfState,0,0):
         print("Soduko board Solved !!")
-        Sudoku_Backtracking.print_board(current_state)  
+        Sudoku_Backtracking.print_board(copyOfState)  
         # drawPuzzle()
         # window.update()
-        Backtracking_Solver(current_state,0,0)
+        
+        solve_sudoku(current_state)
+        drawPuzzle()
+        canvas.update()
     else:
         print("No Solution For This Sudoku")
+
+    # if Sudoku_Backtracking.Backtracking_Solver(current_state,0,0):
+    #     print("Soduko board Solved !!")
+    #     Sudoku_Backtracking.print_board(current_state)  
+    #     drawPuzzle()
+    # else:
+    #     print("No Solution For This Sudoku")
+
 
 def Backtracking_Solver(grid,row,col): 
     
@@ -97,42 +112,47 @@ def Backtracking_Solver(grid,row,col):
 
 def mode1():
     global modeSelected,button
+    unselect()
     modeSelected = 1
     print(modeSelected)
     if button is None:
-        button = Button(window,text='generate puzzle',font=('arial',17),foreground='#D6E4E5',background="#404258",command=generatePuzzle)
+        button = Button(window,text='generate puzzle',font=('arial',17),foreground='#D6E4E5',background="#404258",command=genPuzzle)
         button.place(x=950*SCALE,y=425*SCALE)
     
     else:
-        button.config(text='generate puzzle')
+        button.config(text='generate puzzle',command=genPuzzle)
 
 def mode2():
     global modeSelected,button
+    unselect()
     modeSelected = 2
     print(modeSelected)
     if button is None:
         button = Button(window,text='Solve',font=('arial',17),foreground='#D6E4E5',background="#404258",command=solvePuzzle)
         button.place(x=950*SCALE,y=425*SCALE)
     else:
-        button.config(text='Solve')
+        button.config(text='Solve',command=solvePuzzle)
 
 
 def mode3():
-    global modeSelected,button
-    modeSelected = 3
-    print(modeSelected)
-    if button is None:
-        button = Button(window,text='Solve',font=('arial',17),foreground='#D6E4E5',background="#404258",command=solvePuzzle)
-        button.place(x=950*SCALE,y=425*SCALE)
-    else:
-        button.config(text='Solve')
+
+    # global modeSelected,button
+    # unselect()
+    # modeSelected = 3
+    # print(modeSelected)
+    # if button is None:
+    #     button = Button(window,text='Solve',font=('arial',17),foreground='#D6E4E5',background="#404258",command=solvePuzzle)
+    #     button.place(x=950*SCALE,y=425*SCALE)
+    # else:
+    #     button.config(text='user solve',command=interactive)
+    pass
 
 def drawRadioButtons():
     global window,radioButtonsVar
     
-    Radiobutton(window, text = "solve generated puzzle", variable = radioButtonsVar, 
+    Radiobutton(window, text = "generate puzzle", variable = radioButtonsVar, 
         value = 1, font=('arial',11),foreground='#D6E4E5',background="#404258",command=mode1).place(x=SCALE*950,y=SCALE*100,) 
-    Radiobutton(window, text = "solve given puzzle", variable = radioButtonsVar, 
+    Radiobutton(window, text = "ai solve", variable = radioButtonsVar, 
         value = 2, font=('arial',11),foreground='#D6E4E5',background="#404258",command=mode2).place(x=SCALE*950,y=SCALE*150)
     Radiobutton(window, text = "Interactive", variable = radioButtonsVar, 
         value = 3, font=('arial',11),foreground='#D6E4E5',background="#404258",command=mode3).place(x=SCALE*950,y=SCALE*200)
@@ -158,9 +178,11 @@ def drawEnvironment():
 def drawPuzzle():
     global current_state,numberIds
     
+
     
     for i in range(9):
         for j in range(9):
+            canvas.delete(numberIds[i][j])
             element = current_state[i][j]
             if element == 0:
                 element = ' '
@@ -194,7 +216,7 @@ def selectPlace(event):
     drawSelectedTile()
     
 # unselect only on gui selectedPlace haven't been touched
-def unselect():
+def unselect(event=None):
     global selectedPlace
     if(selectedPlace[0]>-1):
         j,i=selectedPlace[0],selectedPlace[1]
@@ -262,7 +284,7 @@ def changePlace(event):
         drawSelectedTile()
 
 def editSelectedTile(event):
-    global selectedPlace,canvas,window,current_state
+    global selectedPlace,canvas,current_state
     j = selectedPlace[0]
     i = selectedPlace[1]
 
@@ -275,7 +297,7 @@ def editSelectedTile(event):
         x=' '
     canvas.delete(numberIds[j][i])
     numberIds[j][i]=canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
-    window.update()
+    canvas.update()
     
     
 
@@ -297,30 +319,92 @@ def editTileOn(row,col,newValue):
         x=' '
     canvas.delete(numberIds[j][i])
     numberIds[j][i]=canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
-    window.update()
+    # unselect()
+    canvas.update()
 
+def get_empty_cells(grid):
+    """Find empty cells (cells with 0) in the Sudoku grid."""
+    empty_cells = []
+    for i in range(9):
+        for j in range(9):
+            if grid[i][j] == 0:
+                empty_cells.append((i, j))
+    return empty_cells
+
+def is_valid(grid, row, col, num):
+    """Check if the current number is valid in the row, column, and box."""
+    for x in range(9):
+        if grid[row][x] == num or grid[x][col] == num:
+            return False
+
+    start_row, start_col = 3 * (row // 3), 3 * (col // 3)
+    for i in range(3):
+        for j in range(3):
+            if grid[i + start_row][j + start_col] == num:
+                return False
+
+    return True
+
+def get_possible_values(grid, row, col):
+    """Get possible values for a given empty cell."""
+    possible_values = set(str(i) for i in range(1, 10))
+    for x in range(9):
+        possible_values.discard(str(grid[row][x]))
+        possible_values.discard(str(grid[x][col]))
+
+    start_row, start_col = 3 * (row // 3), 3 * (col // 3)
+    for i in range(3):
+        for j in range(3):
+            possible_values.discard(str(grid[i + start_row][j + start_col]))
+
+    return possible_values
+
+def solve_sudoku(grid):
+    empty_cells = get_empty_cells(grid)
+    return solve(empty_cells,grid)
+
+def solve(empty_cells:list,grid):
+    if not empty_cells:
+        return True
+
+    row, col = empty_cells.pop()
+    possible_values = get_possible_values(grid, row, col)
+    print(f'for row: {row} col:{col} possible values are {possible_values}')
+
+    for num in possible_values:
+        if is_valid(grid, row, col, num):
+            grid[row][col] = int(num)
+            editTileOn(row,col,num)
+            time.sleep(0.2)
+            if solve(empty_cells,grid):
+                return True
+            editTileOn(row,col,'0')
+            grid[row][col] = 0  # Backtrack if no valid number found
+            time.sleep(0.2)
+    empty_cells.append((row, col))  # Add back the cell for backtracking
+    return False  # No valid number found for this cell
 
 if __name__ == "__main__":
     
-    current_state = [[0,7,0,0,0,0,6,8,0],
-                    [0,0,0,0,7,3,0,0,9],
-                    [3,0,9,0,0,0,0,4,5],
-                    [4,9,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,9,0,2],
-                    [0,0,0,0,0,0,0,3,6],
-                    [9,6,0,0,0,0,3,0,8],
-                    [7,0,0,6,8,0,0,0,0],
-                    [0,2,8,0,0,0,6,8,0],]
+    # current_state = [[0,7,0,0,0,0,6,8,0],
+    #                 [0,0,0,0,7,3,0,0,9],
+    #                 [3,0,9,0,0,0,0,4,5],
+    #                 [4,9,0,0,0,0,0,0,0],
+    #                 [0,0,0,0,0,0,9,0,2],
+    #                 [0,0,0,0,0,0,0,3,6],
+    #                 [9,6,0,0,0,0,3,0,8],
+    #                 [7,0,0,6,8,0,0,0,0],
+    #                 [0,2,8,0,0,0,6,8,0],]
 
     drawEnvironment()
     drawRadioButtons()
     drawPuzzle()
     canvas.place(x=0,y=0)
 
-    window.bind('<Button-1>',selectPlace)
+    canvas.bind('<Button-1>',selectPlace)
     window.bind("<Key>",printKeys)
     
-    window.bind("<Escape>",terminate)
+    window.bind("<Escape>",unselect)
     window.bind("<Right>",changePlace)
     window.bind("<Up>",changePlace)
     window.bind("<Down>",changePlace)
