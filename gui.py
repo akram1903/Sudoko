@@ -28,6 +28,20 @@ if __name__=='__main__':
     modeSelected=0
     selectedPlace=[-1,-1]
 
+    
+    # for making the gui faster
+    environment:list=[]
+    rectangleIds=[]
+    numberIds=[]
+    selectionLines=[]
+    selectionBlock=None
+    for i in range(9):
+        # rectangleIds.append([])
+        numberIds.append([])
+        for j in range(9):
+            # rectangleIds[i].append([])
+            numberIds[i].append(0)
+
 def printKeys(event):
     print(event.keysym+" key pressed")
     if event.keysym in ["1","2","3","4","5","6","7","8","9","BackSpace","space"]:
@@ -125,20 +139,24 @@ def drawRadioButtons():
     
 
 def drawEnvironment():
+    global environment
     
-    for i in range(9):
-        canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE)
-        canvas.create_line(0,100*i*SCALE,900*SCALE,100*i*SCALE,width=2*SCALE)
+    while environment.__len__()>0:
+        canvas.delete(environment.pop())
 
-    canvas.create_line(300*SCALE,0,300*SCALE,900*SCALE,width=5*SCALE)
-    canvas.create_line(600*SCALE,0,600*SCALE,900*SCALE,width=5*SCALE)
-    canvas.create_line(0,300*SCALE,900*SCALE,300*SCALE,width=5*SCALE)
-    canvas.create_line(0,600*SCALE,900*SCALE,600*SCALE,width=5*SCALE)
+    for i in range(9):
+        environment.append(canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE))
+        environment.append(canvas.create_line(0,100*i*SCALE,900*SCALE,100*i*SCALE,width=2*SCALE))
+
+    environment.append(canvas.create_line(300*SCALE,0,300*SCALE,900*SCALE,width=5*SCALE))
+    environment.append(canvas.create_line(600*SCALE,0,600*SCALE,900*SCALE,width=5*SCALE))
+    environment.append(canvas.create_line(0,300*SCALE,900*SCALE,300*SCALE,width=5*SCALE))
+    environment.append(canvas.create_line(0,600*SCALE,900*SCALE,600*SCALE,width=5*SCALE))
 
 
 
 def drawPuzzle():
-    global current_state
+    global current_state,numberIds
     
     
     for i in range(9):
@@ -146,7 +164,7 @@ def drawPuzzle():
             element = current_state[i][j]
             if element == 0:
                 element = ' '
-            canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
+            numberIds[i][j]=canvas.create_text((j*100+50)*SCALE,(i*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
 
 
 def keyPressed(event):
@@ -183,24 +201,36 @@ def unselect():
         element = current_state[j][i]
         if element == 0:
             element = ' '
-        canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=NORMAL_TILE_COLOR)
-        canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
+        
+        canvas.delete(selectionBlock)
+            
+        while(selectionLines.__len__()>0):
+            canvas.delete(selectionLines.pop())
 
+        
 
 def drawSelectedTile():
+    global numberIds,selectionBlock,selectionLines
 
     j,i=selectedPlace[0],selectedPlace[1]
-    canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
+    if selectionBlock is not None:
+        canvas.delete(selectionBlock)
+    selectionBlock=canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
     element= current_state[j][i]
     if element == 0:
         element = ' '
-    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
+
+    canvas.delete(numberIds[j][i])
+    numberIds[j][i]=canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{element}',font=('arial',40),fill='#D6E4E5')
     # print(current_state)
     drawEnvironment()
-    canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
-    canvas.create_line(0,100*j*SCALE,900*SCALE,100*j*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
-    canvas.create_line(100*(i+1)*SCALE,0,100*(1+i)*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
-    canvas.create_line(0,100*(j+1)*SCALE,900*SCALE,100*(1+j)*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR)
+    while(selectionLines.__len__()>0):
+        canvas.delete(selectionLines.pop())
+    
+    selectionLines.append(canvas.create_line(100*i*SCALE,0,100*i*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR))
+    selectionLines.append(canvas.create_line(0,100*j*SCALE,900*SCALE,100*j*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR))
+    selectionLines.append(canvas.create_line(100*(i+1)*SCALE,0,100*(1+i)*SCALE,900*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR))
+    selectionLines.append(canvas.create_line(0,100*(j+1)*SCALE,900*SCALE,100*(1+j)*SCALE,width=2*SCALE,fill=SELECTED_TILE_COLOR))
     
 
 def changePlace(event):
@@ -236,14 +266,15 @@ def editSelectedTile(event):
     j = selectedPlace[0]
     i = selectedPlace[1]
 
-    canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
+    # canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
     x = event.keysym
     if x in ['BackSpace','space','0']:
         x = 0
     current_state[j][i]=int(x)
     if x ==0:
         x=' '
-    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
+    canvas.delete(numberIds[j][i])
+    numberIds[j][i]=canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
     window.update()
     
     
@@ -258,16 +289,15 @@ def editTileOn(row,col,newValue):
     selectedPlace = [row,col]
     drawSelectedTile()
 
-    canvas.create_rectangle(i*100*SCALE,j*100*SCALE,(i*100+100)*SCALE,(j*100+100)*SCALE,fill=SELECTED_TILE_COLOR)
     x = newValue
     if x in ['BackSpace','space','0']:
         x = 0
     current_state[j][i]=int(x)
     if x ==0:
         x=' '
-    canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
+    canvas.delete(numberIds[j][i])
+    numberIds[j][i]=canvas.create_text((i*100+50)*SCALE,(j*100+50)*SCALE,text=f'{x}',font=('arial',40),fill='#FFFFFF')
     window.update()
-    drawEnvironment()
 
 
 if __name__ == "__main__":
@@ -284,7 +314,7 @@ if __name__ == "__main__":
 
     drawEnvironment()
     drawRadioButtons()
-    
+    drawPuzzle()
     canvas.place(x=0,y=0)
 
     window.bind('<Button-1>',selectPlace)
