@@ -2,6 +2,7 @@
 import pygame
 import time
 pygame.font.init()
+import generatePuzzle
 # from Sudoku_Backtracking import Backtracking_Solver,is_valid_move
 BACKGROUND_COLOR = (240, 240, 240)
 GRID_COLOR = (184, 134, 11)
@@ -12,17 +13,7 @@ game_over_image = pygame.image.load("game_over_image.png")  # Replace with the a
 
 
 class Grid:
-    board = [
-        [0, 0, 0, 2, 6, 0, 7, 0, 1],
-        [6, 8, 0, 0, 7, 0, 0, 9, 0],
-        [1, 9, 0, 0, 0, 4, 5, 0, 0],
-        [8, 2, 0, 1, 0, 0, 0, 4, 0],
-        [0, 0, 4, 6, 0, 2, 9, 0, 0],
-        [0, 5, 0, 0, 0, 3, 0, 2, 8],
-        [0, 0, 9, 3, 0, 0, 0, 7, 4],
-        [0, 4, 0, 0, 5, 0, 0, 3, 6],
-        [7, 0, 3, 0, 1, 8, 0, 0, 0]
-    ]
+    [i,board] = generatePuzzle.generatePuzzle()
 
     def __init__(self, rows, cols, width, height, win):
         self.rows = rows
@@ -246,10 +237,10 @@ def redraw_window(win, board, time, strikes):
     win.fill(BACKGROUND_COLOR)
     # Draw time
     fnt = pygame.font.SysFont("TimesNewRoman", 30)
-    text = fnt.render("Time: " + format_time(time), 1, (0,0,0))
-    win.blit(text, (20,560))
+    # text = fnt.render("Time: " + format_time(time), 1, (0,0,0))
+    # win.blit(text, (20,560))
     # Draw Strikes
-    text = fnt.render("F"* strikes, 1, (255, 0, 0))
+    text = fnt.render(f"strikes = {strikes}", 1, (255, 0, 0))
     win.blit(text, (540 - 250, 550))
     # Draw grid and board
     board.draw()

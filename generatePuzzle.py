@@ -32,8 +32,8 @@ def generatePuzzle():
             elif len(availableNumbers)==1:
                 choiceIndex=0
             else:
-                print('no available puzzle')
-                print('trying another grid')
+                # print('no available puzzle')
+                # print('trying another grid')
                 return generatePuzzle()
 
             choice = availableNumbers[choiceIndex]

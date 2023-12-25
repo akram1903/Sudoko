@@ -374,13 +374,15 @@ def solve(empty_cells:list,grid):
     for num in possible_values:
         if is_valid(grid, row, col, num):
             grid[row][col] = int(num)
-            editTileOn(row,col,num)
-            time.sleep(0.2)
+            # editTileOn(row,col,num)
+            # time.sleep(0.2)
             if solve(empty_cells,grid):
+                editTileOn(row,col,'0')
+                time.sleep(0.2)
                 return True
-            editTileOn(row,col,'0')
+            # editTileOn(row,col,'0')
             grid[row][col] = 0  # Backtrack if no valid number found
-            time.sleep(0.2)
+            # time.sleep(0.2)
     empty_cells.append((row, col))  # Add back the cell for backtracking
     return False  # No valid number found for this cell
 
